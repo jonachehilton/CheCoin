@@ -6,8 +6,8 @@
   "scripts": {
     "start": "npm run compile && node src/main.js",
     "compile": "tsc",
-    "lint": "eslint src/",
-    "lint-fix": "eslint src/ --fix"
+    "lint": "eslint src/ --ext .ts",
+    "lint-fix": "eslint src/ --ext .ts --fix"
   },
   "author": "",
   "license": "ISC",
