@@ -29,7 +29,15 @@ const genesisBlock: Block = new Block(
 );
 
 // For now use a simple array to store the blockchain. This means data will not be persisted if the node goes down.
-const blockchain: Block[] = [genesisBlock];
+let blockchain: Block[] = [genesisBlock];
+
+function getBlockchain(): Block[] {
+  return blockchain;
+}
+
+function getLatestBlock(): Block {
+  return blockchain[blockchain.length - 1];
+}
 
 
 function calculateHash(index: number, previousHash: string, timestamp: number, data: string): string {
@@ -78,5 +86,15 @@ function isChainValid(chainToValidate: Block[]): boolean {
   }
 
   return true;
+}
+
+function replaceChain(newBlocks: Block[]) {
+  if (isChainValid(newBlocks) && newBlocks.length > getBlockchain().length) {
+    console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
+    blockchain = newBlocks;
+    broadcastLatest();
+  } else {
+    console.log('Received invalid blockchain');
+  }
 }
 
