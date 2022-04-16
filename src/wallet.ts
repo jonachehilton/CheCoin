@@ -1,8 +1,19 @@
 import { ec } from 'elliptic';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync } from 'fs';
 
 const EC = new ec('secp256k1');
 const privateKeyLocation = 'node/wallet/private_key';
+
+function getPrivateFromWallet(): string {
+    const buffer = readFileSync(privateKeyLocation, 'utf8');
+    return buffer.toString();
+}
+
+function getPublicFromWallet(): string {
+  const privateKey = getPrivateFromWallet();
+  const key = EC.keyFromPrivate(privateKey, 'hex');
+  return key.getPublic().encode('hex');
+}
 
 function generatePrivatekey(): string {
     const keyPair = EC.genKeyPair();
