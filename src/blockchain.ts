@@ -1,4 +1,5 @@
 import * as CryptoJS from 'crypto-js';
+import { BigNumber } from 'bignumber.js'
 
 class Block {
   public index: number;
@@ -35,13 +36,9 @@ const genesisBlock: Block = new Block(
 // For now use a simple array to store the blockchain. This means data will not be persisted if the node goes down.
 let blockchain: Block[] = [genesisBlock];
 
-function getBlockchain(): Block[] {
-  return blockchain;
-}
+const getBlockchain = (): Block[] => blockchain;
 
-function getLatestBlock(): Block {
-  return blockchain[blockchain.length - 1];
-}
+const getLatestBlock = (): Block => blockchain[blockchain.length - 1];
 
 function calculateHash(index: number, previousHash: string, timestamp: number, data: Transaction[],
                       difficulty: number, minterBalance: number, minterAddress: string): string {
@@ -77,7 +74,10 @@ function isBlockStructureValid(block: Block): boolean {
     && typeof block.hash === 'string'
     && typeof block.previousHash === 'string'
     && typeof block.timestamp === 'number'
-    && typeof block.data === 'string';
+    && typeof block.data === 'object'
+    && typeof block.difficulty === 'number'
+    && typeof block.minterBalance === 'number'
+    && typeof block.minterAddress === 'string';
 }
 
 function isChainValid(chainToValidate: Block[]): boolean {
@@ -90,6 +90,23 @@ function isChainValid(chainToValidate: Block[]): boolean {
   }
 
   return true;
+}
+
+function isBlockStakingValid(prevHash: string, address: string, timestamp: number, balance: number, difficulty: number, index: number): boolean {
+  difficulty += 1;
+
+  if (index <= mintingWithoutCoinIndex) {
+    balance = balance + 1;
+  }
+
+  // PoS pizzle from https://blog.ethereum.org/2014/07/05/stake/
+  // SHA256(prevhash + address + timestamp) <= 2^256 * balance / difficulty 
+  const balanceOverDifficulty = new BigNumber(2).exponentiatedBy(256).times(balance).dividedBy(difficulty);
+  const stakingHash: string = CryptoJS.SHA256(prevHash + address + timestamp).toString();
+  const decimalStakingHash = new BigNumber(stakingHash, 16);
+  const difference = balanceOverDifficulty.minus(decimalStakingHash).toNumber();
+
+  return difference >= 0;
 }
 
 function replaceChain(newBlocks: Block[]) {
