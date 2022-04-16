@@ -18,6 +18,13 @@ function initHttpServer(port: number) {
       res.send(newBlock);
   });
 
+  app.post('mintTransaction', (req, res) => {
+    const address = req.body.address;
+    const amount = req.body.amount;
+    const resp = generateNextBlockWithTransaction(address, amount);
+    res.send(resp);
+  })
+
   
   // app.get('/peers', (req, res) => {
   //     res.send(getSockets().map(( s: any ) => s._socket.remoteAddress + ':' + s._socket.remotePort));
