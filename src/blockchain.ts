@@ -1,6 +1,10 @@
 import * as CryptoJS from 'crypto-js';
 import { BigNumber } from 'bignumber.js'
 
+import {
+  Transaction
+} from './transaction';
+
 class Block {
   public index: number;
   public hash: string;
@@ -35,6 +39,9 @@ const genesisBlock: Block = new Block(
 
 // For now use a simple array to store the blockchain. This means data will not be persisted if the node goes down.
 let blockchain: Block[] = [genesisBlock];
+
+// Number of blocks that can be minted with accounts without any coins
+const mintingWithoutCoinIndex = 100;
 
 const getBlockchain = (): Block[] => blockchain;
 
@@ -104,6 +111,24 @@ function findBlock(index: number, previousHash: string, data: Transaction[], dif
   }
 }
 
+function replaceChain(newBlocks: Block[]) {
+  if (isChainValid(newBlocks) && newBlocks.length > getBlockchain().length) {
+    console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
+    blockchain = newBlocks;
+    // broadcastLatest();
+  } else {
+    console.log('Received invalid blockchain');
+  }
+}
+
+function sendTransaction(address:string, amount: number): Transaction {
+  const tx: Transaction = createTransaction(address, amount, getPrivateFromWallet(), getUnspentTxOuts(), getTransactionPool());
+  addToTransactionPool(tx, getUnspentTxOuts());
+  return tx;
+}
+
+/* Validations */
+
 function isTimestampValid(block: Block, previousBlock: Block): boolean {
   return (previousBlock.timestamp - 60 < block.timestamp) 
           && block.timestamp - 60 < getCurrentTimestamp();
@@ -154,7 +179,7 @@ function isBlockStakingValid(prevHash: string, address: string, timestamp: numbe
     balance = balance + 1;
   }
 
-  // PoS pizzle from https://blog.ethereum.org/2014/07/05/stake/
+  // Proof of stake pizzle from https://blog.ethereum.org/2014/07/05/stake/
   // SHA256(prevhash + address + timestamp) <= 2^256 * balance / difficulty 
   const balanceOverDifficulty = new BigNumber(2).exponentiatedBy(256).times(balance).dividedBy(difficulty);
   const stakingHash: string = CryptoJS.SHA256(prevHash + address + timestamp).toString();
@@ -162,16 +187,6 @@ function isBlockStakingValid(prevHash: string, address: string, timestamp: numbe
   const difference = balanceOverDifficulty.minus(decimalStakingHash).toNumber();
 
   return difference >= 0;
-}
-
-function replaceChain(newBlocks: Block[]) {
-  if (isChainValid(newBlocks) && newBlocks.length > getBlockchain().length) {
-    console.log('Received blockchain is valid. Replacing current blockchain with received blockchain');
-    blockchain = newBlocks;
-    // broadcastLatest();
-  } else {
-    console.log('Received invalid blockchain');
-  }
 }
 
 export {
