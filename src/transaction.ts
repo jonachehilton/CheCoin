@@ -78,6 +78,10 @@ const getTxInAmount = (txIn: TxIn, aUnspentTxOuts: UnspentTxOut[]): number => {
   return findUnspentTxOut(txIn.txOutId, txIn.txOutIndex, aUnspentTxOuts).amount;
 };
 
+const getPublicKey = (aPrivateKey: string): string => {
+  return ec.keyFromPrivate(aPrivateKey, 'hex').getPublic().encode('hex');
+};
+
 const findUnspentTxOut = (transactionId: string, index: number, aUnspentTxOuts: UnspentTxOut[]): UnspentTxOut => {
   return aUnspentTxOuts.find((uTxO) => uTxO.txOutId === transactionId && uTxO.txOutIndex === index);
 };
@@ -273,8 +277,7 @@ function validateTxIn(txIn: TxIn, transaction: Transaction, aUnspentTxOuts: Unsp
 };
 
 
-
-
 export {
-  Transaction, UnspentTxOut, TxIn, TxOut, getTransactionId, signTxIn
+  signTxIn, getTransactionId, isAddressValid, validateTransaction,
+  UnspentTxOut, TxIn, TxOut, getPublicKey, Transaction
 };
