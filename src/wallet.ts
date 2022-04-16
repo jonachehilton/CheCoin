@@ -1,5 +1,7 @@
 import { ec } from 'elliptic';
 import { existsSync, readFileSync, writeFileSync } from 'fs';
+import * as _ from 'lodash';
+import { getPublicKey, getTransactionId, signTxIn, Transaction, TxIn, TxOut, UnspentTxOut } from './transaction'
 
 const EC = new ec('secp256k1');
 const privateKeyLocation = 'node/wallet/private_key';
@@ -30,4 +32,11 @@ function initWallet() {
 
     writeFileSync(privateKeyLocation, newPrivateKey);
     console.log('new wallet with private key created');
+};
+
+function getBalance(address: string, unspentTxOuts: UnspentTxOut[]): number {
+  return _(unspentTxOuts)
+      .filter((uTxO: UnspentTxOut) => uTxO.address === address)
+      .map((uTxO: UnspentTxOut) => uTxO.amount)
+      .sum();
 };
