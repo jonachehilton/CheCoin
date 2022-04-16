@@ -7,7 +7,7 @@ import {
   getPublicKey, getTransactionId, signTxIn, Transaction, TxIn, TxOut, UnspentTxOut,
 } from './transaction';
 
-const EC = new ec('secp256k1');
+const secp256k1 = new ec('secp256k1');
 const privateKeyLocation = 'node/wallet/private_key';
 
 function getPrivateFromWallet(): string {
@@ -17,12 +17,12 @@ function getPrivateFromWallet(): string {
 
 function getPublicFromWallet(): string {
   const privateKey = getPrivateFromWallet();
-  const key = EC.keyFromPrivate(privateKey, 'hex');
+  const key = secp256k1.keyFromPrivate(privateKey, 'hex');
   return key.getPublic().encode('hex');
 }
 
 function generatePrivatekey(): string {
-  const keyPair = EC.genKeyPair();
+  const keyPair = secp256k1.genKeyPair();
   const privateKey = keyPair.getPrivate();
   return privateKey.toString(16);
 }
@@ -78,9 +78,7 @@ function filterTxPoolTxs(unspentTxOuts: UnspentTxOut[], transactionPool: Transac
   for (const unspentTxOut of unspentTxOuts) {
     const txIn = _.find(txIns, (aTxIn: TxIn) => aTxIn.txOutIndex === unspentTxOut.txOutIndex && aTxIn.txOutId === unspentTxOut.txOutId);
 
-    if (txIn === undefined) {
-
-    } else {
+    if (!txIn === undefined) {
       removable.push(unspentTxOut);
     }
   }
