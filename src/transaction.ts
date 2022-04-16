@@ -78,6 +78,29 @@ function signTxIn(transaction: Transaction, txInIndex: number,
   return signature
 }
 
+const updateUnspentTxOuts = (aTransactions: Transaction[], aUnspentTxOuts: UnspentTxOut[]): UnspentTxOut[] => {
+  const newUnspentTxOuts: UnspentTxOut[] = aTransactions
+      .map((t) => {
+          return t.txOuts.map((txOut, index) => new UnspentTxOut(t.id, index, txOut.address, txOut.amount));
+      })
+      .reduce((a, b) => a.concat(b), []);
+
+  const consumedTxOuts: UnspentTxOut[] = aTransactions
+      .map((t) => t.txIns)
+      .reduce((a, b) => a.concat(b), [])
+      .map((txIn) => new UnspentTxOut(txIn.txOutId, txIn.txOutIndex, '', 0));
+
+  const resultingUnspentTxOuts = aUnspentTxOuts
+      .filter(((uTxO) => !findUnspentTxOut(uTxO.txOutId, uTxO.txOutIndex, consumedTxOuts)))
+      .concat(newUnspentTxOuts);
+
+  return resultingUnspentTxOuts;
+};
+
+
+
+
+
 export {
   Transaction, UnspentTxOut, TxIn, TxOut, getTransactionId, signTxIn
 };
