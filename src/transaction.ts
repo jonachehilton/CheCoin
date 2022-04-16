@@ -303,7 +303,7 @@ function validateCoinbaseTx(transaction: Transaction, blockIndex: number): boole
     console.log('invalid number of txOuts in coinbase transaction');
     return false;
   }
-  if (transaction.txOuts[0].amount != COINBASE_AMOUNT) {
+  if (transaction.txOuts[0].amount !== COINBASE_AMOUNT) {
     console.log('invalid coinbase amount in coinbase transaction');
     return false;
   }
