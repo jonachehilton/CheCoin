@@ -1,15 +1,15 @@
 {
   "name": "npm",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "A general purpose proof of stake cryptocurrency, written in TypeScript.",
+  "main": "src/main.js",
   "scripts": {
     "start": "npm run compile && node src/main.js",
     "compile": "tsc",
     "lint": "eslint src/ --ext .ts",
     "lint-fix": "eslint src/ --ext .ts --fix"
   },
-  "author": "",
+  "author": "Jonache Hilton",
   "license": "ISC",
   "dependencies": {
     "bignumber.js": "^9.0.2",
